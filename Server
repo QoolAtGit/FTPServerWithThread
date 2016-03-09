@@ -1,0 +1,18 @@
+#include <QtNetwork>
+QTcpServer *server;
+QTcpSocket *clientConnection;
+server = new QTcpServer();
+server->listen(QHostAddress::Any, 6665);
+connect(server, SIGNAL(newConnection()), this, SLOT(acceptConnection()));
+void acceptConnection()
+{
+    clientConnection = server->nextPendingConnection();
+    connect(clientConnection, SIGNAL(readyRead()), this, SLOT(readClient()));
+}
+void readClient()
+{
+    QString str = clientConnection->readAll();
+    //或者
+    char buf[1024];
+    clientConnection->read(buf,1024);
+}
