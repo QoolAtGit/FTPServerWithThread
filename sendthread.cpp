@@ -37,7 +37,8 @@ void sendThread::run()
     out << totalSize << (quint64) (block.size() - sizeof(quint64)*2);
     remainSize=totalSize-(int)tcpSocket.write(block);
     block.resize(0);
-
+    emit fileSize(totalSize);
+    emit status(totalSize-remainSize);//Update progress;
     qDebug()<<"totalSize:"<<totalSize;
 
     ///
@@ -45,11 +46,11 @@ void sendThread::run()
     ///
     while(remainSize>0)
     {
-        qDebug()<<"Remaining size:"<<remainSize;
         block = readFile->read(qMin(remainSize,sendSize));
         tcpSocket.write(block);
         remainSize-=block.size();
         block.resize(0);
+        emit status(totalSize-remainSize);
     }
     if(remainSize<=0)
     {

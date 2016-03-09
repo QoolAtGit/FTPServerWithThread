@@ -15,6 +15,8 @@ public:
 
 signals:
     void error(QTcpSocket::SocketError socketError);
+    void status(qint64);
+    void fileSize(qint64);
 
 private:
     int socketDescriptor;

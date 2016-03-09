@@ -2,6 +2,7 @@
 #define SERVERS
 
 #include <QTcpServer>
+
 class Servers : public QTcpServer
 {
     Q_OBJECT

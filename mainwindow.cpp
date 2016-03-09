@@ -1,6 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "servers.h"
+#include <QtNetwork>
+#include <QFileDialog>
+#include <QGridLayout>
+#include <QDialogButtonBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -21,22 +25,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->label_Port->setText("Server port:10801");
     ui->label_Messaga->setText("File to be sended:\nG:/Code/Qt/tr.txt");
 
-//    QWidget *qw = new QWidget;
     QGridLayout *mainLayout = new QGridLayout();
-    mainLayout->setColumnMinimumWidth(0, 100);
-    mainLayout->setColumnMinimumWidth(1, 10);
-    mainLayout->setHorizontalSpacing(100);
-    mainLayout->setVerticalSpacing(50);
-    mainLayout->setColumnStretch(0, 1);
-    mainLayout->setColumnStretch(1, 2);
-    QLabel *label_Tea=new QLabel;
-    label_Tea->setText("Hello Text!");
-    mainLayout->addWidget(label_Tea,0,0,1,2);
-//    ui->mainLayout->addWidget(ui->label_Title,0,0,1,1);
-//    mainLayout->addWidget(ui->label_Port,3,0,1,1);
-//    mainLayout->addWidget(ui->label_Messaga,2,0,1,2,Qt::AlignCenter);
-    this->setLayout(mainLayout);
-    this->show();
+    QDialogButtonBox *buttonBox = new QDialogButtonBox;
+    buttonBox->addButton(ui->OpenFileButton, QDialogButtonBox::ActionRole);
+    buttonBox->addButton(ui->QuitButton, QDialogButtonBox::RejectRole);
+    mainLayout->addWidget(ui->label_Title,0,0);
+    mainLayout->addWidget(ui->label_Port,1,0);
+    mainLayout->addWidget(ui->label_Messaga,2,0,1,2);
+    mainLayout->addWidget(buttonBox, 3, 0, 1,2);
+    QWidget* widget = new QWidget(this);
+    widget->setLayout(mainLayout);
+    this->setCentralWidget(widget);
 
     if( !tcpServer.listen(QHostAddress::Any, 10801) )
     {
