@@ -16,7 +16,6 @@ protected:
 
 private:
     QString filePath;
-    //    qintptr<QList> serverList;
 };
 
 #endif // SERVERS
