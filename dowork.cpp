@@ -1,23 +1,21 @@
-#include "sendthread.h"
-#include <QtNetwork>
+#include "dowork.h"
 
-sendThread::sendThread(int socketDescriptor, const QString &path, QObject *parent)
-    : QThread(parent), socketDescriptor(socketDescriptor), filePath(path)
+dowork::dowork(int socketDescriptor, const QString &path):socketDescriptor(socketDescriptor), filePath(path)
 {
     totalSize=0;
     remainSize=0;
     sendSize=0;
     packSize=128*1024;
-}
-void sendThread::run()
-{
-    QTcpSocket tcpSocket;
     if (!tcpSocket.setSocketDescriptor(socketDescriptor))
     {
-        emit error(tcpSocket.error());
+        qDebug()<<tcpSocket.error();
         return;
     }
-
+    connect(&tcpSocket,&QTcpSocket::bytesWritten,this,&missions);
+}
+void dowork::startSend()
+{
+    qDebug()<<"This is startSend()";
     readFile = new QFile(filePath);
     if(!readFile->open(QFile::ReadOnly))
     {
@@ -29,7 +27,6 @@ void sendThread::run()
     ///
     ///传输文件信息
     ///
-    QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_5);
     out << quint64(0)<<quint64(0)<<fileName;
@@ -39,26 +36,32 @@ void sendThread::run()
     remainSize=totalSize-(int)tcpSocket.write(block);
     block.resize(0);
     emit fileSize(totalSize);
-    emit status(totalSize-remainSize);//Update progress;
+    emit status(totalSize-remainSize);
     qDebug()<<"totalSize:"<<totalSize;
+}
 
-    ///
-    ///传输文件
-    ///
-    while(remainSize>0)
+void dowork::missions(qint64 sended)
+{
+    qDebug()<<"This is missions()";
+    sendSize+=sended;
+    emit status(sendSize);//Update progress
+    qDebug()<<"sendSize:"<<sendSize;
+    if(sendSize>0)
     {
         block = readFile->read(qMin(remainSize,packSize));
         tcpSocket.write(block);
-        tcpSocket.flush();
         remainSize-=block.size();
         block.resize(0);
         emit status(totalSize-remainSize);
     }
-    if(remainSize<=0)
+    else
+        readFile->close();
+    if(sendSize==totalSize)
     {
         qDebug()<<"Send file seccessfull!";
         readFile->close();
         tcpSocket.disconnectFromHost();
         tcpSocket.waitForDisconnected();
+        emit finish();
     }
 }

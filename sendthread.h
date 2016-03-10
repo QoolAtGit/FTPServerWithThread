@@ -26,6 +26,7 @@ private:
     qint64 totalSize;
     qint64 remainSize;
     qint64 sendSize;
+    qint64 packSize;
 };
 
 #endif // SENDTHREAD
